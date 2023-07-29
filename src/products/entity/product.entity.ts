@@ -2,30 +2,33 @@ import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
 export class Product {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column('uuid')
   key: string;
 
   @Column({ type: 'date', name: 'data_preco' })
-  dataPreco: Date;
+  data_preco: string;
 
   @Column({ type: 'bigint', name: 'cod_produto' })
-  codProduto: number;
+  cod_produto: number;
 
   @Column({ type: 'varchar', length: 20 })
   sku: string;
 
   @Column({ type: 'float' })
-  qtdEstoque: number;
+  qtd_estoque: number;
 
   @Column({ type: 'float' })
   desconto: number;
 
   @Column({ type: 'timestamp', name: 'data_hora_insercao' })
-  dataHoraInsercao: Date;
+  data_hora_insercao: string;
 
   @Column({ type: 'date', name: 'data_inicio' })
-  dataInicio: Date;
+  data_inicio: string;
 
   @Column({ type: 'date', name: 'data_fim' })
-  dataFim: Date;
+  data_fim: string;
 }
