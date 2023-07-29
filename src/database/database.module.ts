@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Product } from 'src/products/entity/product.entity';
 
 @Module({
   imports: [
@@ -10,7 +11,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       username: 'admin',
       password: 'admin',
       database: 'postgres',
-      entities: [__dirname + '/entities/*.entity{.ts,.js}'], // Somente em ambiente de desenvolvimento. Desative em produção.
+      entities: [Product],
+      synchronize: true,
     }),
   ],
 })

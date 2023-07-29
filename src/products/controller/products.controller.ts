@@ -9,17 +9,17 @@ export class ProductsController {
   @Post()
   async create(@Body() products: Product[]) {
     try {
-      const result = await this.productsService.create(products);
+      const result = await this.productsService.createProducts(products);
       return result;
     } catch (error) {
-      return { error: 'Erro ao criar produtos' };
+      return { error: 'Erro no conrtoller ao criar produtos' };
     }
   }
 
   @Get()
   async findAll() {
     try {
-      const result = await this.productsService.findAll();
+      const result = await this.productsService.findAllProducts();
       return result;
     } catch (error) {
       return { error: 'Erro ao buscar produtos' };
