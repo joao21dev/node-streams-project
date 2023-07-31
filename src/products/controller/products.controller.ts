@@ -8,12 +8,8 @@ export class ProductsController {
 
   @Post()
   async create(@Body() products: Product[]) {
-    try {
-      const result = await this.productsService.createProducts(products);
-      return result;
-    } catch (error) {
-      return { error: 'Erro no conrtoller ao criar produtos' };
-    }
+    const result = await this.productsService.createProducts(products);
+    return result;
   }
 
   @Get()
