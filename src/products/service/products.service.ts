@@ -49,7 +49,7 @@ export class ProductsService {
 
       validationTransform.end();
 
-      const productsPerChunk = 1000;
+      const productsPerChunk = 5000;
 
       const writableStream = new Writable({
         objectMode: true,
