@@ -93,12 +93,19 @@ export class ProductsService {
     }
   }
 
-  async findAllProducts(): Promise<Product[] | MakeErrorProps> {
+  async findAllProducts(
+    rowCount: number,
+    rowSkip: number,
+  ): Promise<Product[] | MakeErrorProps> {
     try {
       const currentTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
       this.logger.log(`Data e hora de acionamento: ${currentTime}`);
       this.logger.log(`Solicitação do usuário: Recuperar todos os produtos`);
-      const products = await this.productRepository.find();
+
+      const products = await this.productRepository.find({
+        skip: rowSkip,
+        take: rowCount,
+      });
 
       if (products.length === 0) {
         this.logger.log(`Nenhum produto encontrado`);
@@ -108,6 +115,8 @@ export class ProductsService {
           status: HttpStatus.NOT_FOUND,
         });
       }
+
+      this.logger.log(`Número de produtos encontrados: ${products.length}`);
 
       return products;
     } catch (error) {
