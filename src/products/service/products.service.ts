@@ -1,13 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Product } from '../entity/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Transform } from 'stream';
+import { Transform, Writable } from 'stream';
 import validateProductFields from 'src/utils/validateProductFields';
-import { Writable } from 'typeorm/platform/PlatformTools';
+import { format } from 'date-fns';
+import { ErrorLayerKind, MakeErrorProps, makeError } from 'src/utils/makeError';
 
 @Injectable()
 export class ProductsService {
+  private readonly logger = new Logger(ProductsService.name);
+
   constructor(
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
@@ -30,6 +33,12 @@ export class ProductsService {
 
   async createProducts(products: Product[]) {
     try {
+      const currentTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+      this.logger.log(`Data e hora de acionamento: ${currentTime}`);
+      this.logger.log(
+        `Quantidade de produtos a serem inseridos: ${products.length}`,
+      );
+
       const validationTransform = this.createTransform(validateProductFields);
       const newProducts: Product[] = [];
 
@@ -40,19 +49,14 @@ export class ProductsService {
 
       validationTransform.end();
 
-      // Criar uma stream de escrita para enviar os produtos em lotes
-      const linesPerBatch = 10000; // Tamanho do lote em linhas (10 mil linhas)
-      let linesSaved = 0; // Contador para as linhas salvas
+      const productsPerChunk = 1000;
+
       const writableStream = new Writable({
         objectMode: true,
         write: async (chunk, encoding, callback) => {
           try {
             const savedProducts = this.productRepository.create(chunk);
             await this.productRepository.save(savedProducts);
-
-            // Incrementa o contador com a quantidade de linhas salvas no lote atual
-            linesSaved += chunk.length;
-            console.log(`Linhas salvas no lote atual: ${linesSaved}`); // <-- Adiciona o console.log aqui
 
             callback();
           } catch (error) {
@@ -61,29 +65,27 @@ export class ProductsService {
         },
       });
 
-      // Dividir e enviar os produtos em lotes
       let startIndex = 0;
-      let totalLinesSaved = 0; // Contador para o número total de linhas salvas
+      let totalProducts = 0;
 
       while (startIndex < newProducts.length) {
-        const linesBatch = newProducts.slice(
+        const productsChunk = newProducts.slice(
           startIndex,
-          startIndex + linesPerBatch,
+          startIndex + productsPerChunk,
         );
-        const result = writableStream.write(linesBatch);
+        const result = writableStream.write(productsChunk);
 
-        // Se o buffer interno estiver cheio, aguardar o esvaziamento antes de continuar
         if (!result) {
           await new Promise((resolve) => writableStream.once('drain', resolve));
         }
 
-        startIndex += linesPerBatch;
-        totalLinesSaved += linesBatch.length; // Atualiza o contador total
+        startIndex += productsPerChunk;
+        totalProducts += productsChunk.length;
       }
 
       writableStream.end();
 
-      console.log(`Número total de linhas salvas: ${totalLinesSaved}`); // <-- Adiciona o console.log aqui
+      this.logger.log(`Número total de produtos salvos: ${totalProducts}`);
 
       return newProducts;
     } catch (error) {
@@ -91,12 +93,29 @@ export class ProductsService {
     }
   }
 
-  async findAllProducts() {
+  async findAllProducts(): Promise<Product[] | MakeErrorProps> {
     try {
+      const currentTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+      this.logger.log(`Data e hora de acionamento: ${currentTime}`);
+      this.logger.log(`Solicitação do usuário: Recuperar todos os produtos`);
       const products = await this.productRepository.find();
+
+      if (products.length === 0) {
+        this.logger.log(`Nenhum produto encontrado`);
+        return makeError({
+          message: 'Nenhum produto encontrado',
+          layer: ErrorLayerKind.SERVICE_ERROR,
+          status: HttpStatus.NOT_FOUND,
+        });
+      }
+
       return products;
     } catch (error) {
-      throw new Error(error);
+      return makeError({
+        message: error.message,
+        layer: ErrorLayerKind.SERVICE_ERROR,
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      });
     }
   }
 }
