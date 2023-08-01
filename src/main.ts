@@ -6,7 +6,7 @@ import bodyParser = require('body-parser');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const config = new DocumentBuilder().setTitle('Node Stream Project').build();
+  const config = new DocumentBuilder().setTitle('Node Streams Project').build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
