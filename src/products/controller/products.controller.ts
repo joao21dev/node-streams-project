@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ProductsService } from '../service/products.service';
 import { Product } from '../entity/product.entity';
 import { ErrorLayerKind, MakeErrorProps, makeError } from 'src/utils/makeError';
@@ -33,8 +33,14 @@ export class ProductsController {
   }
 
   @Get()
-  async findAll() {
-    const result = await this.productsService.findAllProducts();
+  async findAll(
+    @Query('row_count') rowCount = 10,
+    @Query('row_skip') rowSkip = 0,
+  ) {
+    const result = await this.productsService.findAllProducts(
+      rowCount,
+      rowSkip,
+    );
 
     if (typeof result === 'string') {
       return result;
