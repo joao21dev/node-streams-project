@@ -8,7 +8,7 @@ import { ProductNotFoundDoc } from '../docs/product-not-found.doc';
 import { ProductBadRequestDoc } from '../docs/product-bad-request';
 
 @ApiTags('Produtos')
-@Controller('products')
+@Controller('produtos')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
