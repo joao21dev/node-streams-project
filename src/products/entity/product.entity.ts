@@ -8,27 +8,27 @@ export class Product {
   @Column('uuid')
   key: string;
 
-  @Column({ type: 'date', name: 'data_preco' })
+  @Column({ name: 'data_preco' })
   data_preco: string;
 
   @Column({ type: 'bigint', name: 'cod_produto' })
   cod_produto: number;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ length: 20 })
   sku: string;
 
-  @Column({ type: 'float' })
+  @Column()
   qtd_estoque: number;
 
-  @Column({ type: 'float' })
+  @Column()
   desconto: number;
 
-  @Column({ type: 'timestamp', name: 'data_hora_insercao' })
+  @Column({ name: 'data_hora_insercao' })
   data_hora_insercao: string;
 
-  @Column({ type: 'date', name: 'data_inicio' })
+  @Column({ name: 'data_inicio' })
   data_inicio: string;
 
-  @Column({ type: 'date', name: 'data_fim' })
+  @Column({ name: 'data_fim' })
   data_fim: string;
 }

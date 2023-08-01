@@ -1,24 +1,45 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ProductsService } from '../service/products.service';
 import { Product } from '../entity/product.entity';
+import { ErrorLayerKind, MakeErrorProps, makeError } from 'src/utils/makeError';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  async create(@Body() products: Product[]) {
-    const result = await this.productsService.createProducts(products);
-    return result;
+  async create(@Body() products: Product[] | MakeErrorProps) {
+    if ((products as MakeErrorProps).layer) {
+      return products as MakeErrorProps;
+    }
+
+    if (!Array.isArray(products)) {
+      return makeError({
+        message: 'O corpo da requisição deve ser um array de produtos',
+        layer: ErrorLayerKind.CONTROLLER_ERROR,
+        status: 400, // Bad Request
+      });
+    }
+
+    const result = await this.productsService.createProducts(
+      products as Product[],
+    );
+
+    if ((result as MakeErrorProps).layer) {
+      return result as MakeErrorProps;
+    }
+
+    return result as Product[];
   }
 
   @Get()
   async findAll() {
-    try {
-      const result = await this.productsService.findAllProducts();
+    const result = await this.productsService.findAllProducts();
+
+    if (typeof result === 'string') {
       return result;
-    } catch (error) {
-      return { error: 'Erro ao buscar produtos' };
     }
+
+    return result as Product[];
   }
 }
