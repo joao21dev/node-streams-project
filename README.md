@@ -21,7 +21,7 @@ Este projeto é uma API desenvolvida em NodeJS utilizando o framework NestJS e T
 
 - Descrição: Recebe um array de objetos e insere os dados no banco de dados.
 - Requisitos:
-  - Receberá acima de 100.000 linhas e inserirá no banco em chunks de 5.000. (O objetivo inicial era em chunks de 10.000, mas ainda não consegui fazer o postgres salvar essa quantidade de linhas por chunk).
+  - Receberá acima de 100.000 linhas e inserirá no banco em chunks de 5.000. 
   - Validação dos campos antes da inserção no banco.
   - Em caso de erro de validação:
     - Não inserirá nenhum dado.
